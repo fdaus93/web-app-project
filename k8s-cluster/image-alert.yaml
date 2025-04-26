@@ -1,0 +1,11 @@
+groups:
+  - name: image-change-alerts
+    rules:
+    - alert: DeploymentImageUpdated
+      expr: kube_deployment_spec_image{deployment="webapp-deployment", namespace="default"} != kube_deployment_status_observed_generation{deployment="webapp-deployment", namespace="default"}
+      for: 1m
+      labels:
+        severity: high
+      annotations:
+        description: "The image of the webapp deployment has been updated."
+        summary: "The image for the webapp deployment has changed."
