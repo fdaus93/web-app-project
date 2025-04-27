@@ -1,0 +1,65 @@
+pipeline {
+    agent any
+
+    environment {
+        DOCKER_USERNAME = 'username'
+        DOCKER_PASSWORD = 'password'
+        DOCKER_IMAGE = "image"
+        IMAGE_TAG = "3"
+        REGISTRY = "docker.io"  
+    }
+
+    stages {
+        stage('Checkout') {
+            steps {
+                git branch: 'master', url: 'https://github.com/username/repo.git'
+            }
+        }
+
+        stage('Docker Login') {
+            steps {
+                script {
+                    bat """
+                        echo ${DOCKER_PASSWORD} | docker login -u ${DOCKER_USERNAME} --password-stdin ${REGISTRY}
+                    """
+                }
+            }
+        }
+
+        stage('Build Docker Image') {
+            steps {
+                script {
+                    docker.build("${DOCKER_USERNAME}/${DOCKER_IMAGE}:${IMAGE_TAG}", "docker-webapp/version_3")
+                }
+            }
+        }
+
+        stage('Push Docker Image') {
+            steps {
+                script {
+                    docker.withRegistry("https://${REGISTRY}") {
+                        docker.image("${DOCKER_USERNAME}/${DOCKER_IMAGE}:${IMAGE_TAG}").push()
+                    }
+                }
+            }
+        }
+
+        stage('Deploy to Kubernetes') {
+            steps {
+                script {
+                    bat "kubectl apply -f k8s-cluster/webapp-deployment.yaml"
+                    bat "kubectl set image deployment/webapp-deployment webapp=${DOCKER_USERNAME}/${DOCKER_IMAGE}:${IMAGE_TAG}"
+                }
+            }
+        }
+    }
+
+    post {
+        success {
+            echo 'Deployment successful!'
+        }
+        failure {
+            echo 'Deployment failed.'
+        }
+    }
+}
