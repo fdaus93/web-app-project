@@ -8,7 +8,6 @@ RUN apt-get update && apt-get install -y gcc libpq-dev && apt-get clean
 
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy v1.py into /version_1
 COPY ./v1.py ./v1.py
 
 EXPOSE 5000

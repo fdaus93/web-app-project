@@ -17,3 +17,12 @@ spec:
         image: webapp:v1
         ports:
         - containerPort: 80
+        env:
+        - name: DB_HOST
+          value: "host.docker.internal"
+        - name: DB_NAME
+          value: "postgres"
+        - name: DB_USER
+          value: "postgres"
+        - name: DB_PASSWORD
+          value: "password"
