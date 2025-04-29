@@ -15,6 +15,7 @@ spec:
       containers:
       - name: webapp
         image: fdaus93/webapp:v1
+        imagePullPolicy: Always
         ports:
         - containerPort: 80
         env:
